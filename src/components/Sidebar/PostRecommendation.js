@@ -56,7 +56,7 @@ import steemAPI from '../../steemAPI';
   };
 
   getFilteredPosts = () => {
-    const currentPostPermlink = window.location.pathname.split('/')[3];
+    const currentPostPermlink = this.props.location.pathname.split('/')[3];
     return this.state.recommendedPosts
       .filter(post => post.permlink !== currentPostPermlink)
       .slice(0, 3);

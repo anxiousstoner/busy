@@ -37,12 +37,16 @@ export default class Post extends React.Component {
     getContent: () => {},
   };
 
+  static fetchData(store, match) {
+    return store.dispatch(getContent(match.params.author, match.params.permlink));
+  }
+
   state = {
     commentsVisible: false,
     showHiddenPost: false,
   };
 
-  componentWillMount() {
+  componentDidMount() {
     if ((!this.props.content || this.props.edited) && !this.props.fetching) {
       this.props.getContent(this.props.match.params.author, this.props.match.params.permlink);
     }

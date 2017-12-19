@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl, FormattedMessage } from 'react-intl';
-import { Link } from 'react-router-dom';
+import { withRouter, Link } from 'react-router-dom';
 import { Menu, Popover, Tooltip, Input } from 'antd';
 import steemconnect from 'sc2-sdk';
 import classNames from 'classnames';
@@ -9,50 +9,12 @@ import Avatar from '../Avatar';
 import PopoverMenu, { PopoverMenuItem } from '../PopoverMenu/PopoverMenu';
 import './Topnav.less';
 
-class Topnav extends React.Component {
-  static propTypes = {
-    intl: PropTypes.shape().isRequired,
-    username: PropTypes.string,
-    onMenuItemClick: PropTypes.func,
-  };
+const Topnav = ({ intl, location, username, onMenuItemClick }) => {
+  let content;
+  const next = location.pathname.length > 1 ? location.pathname : '';
 
-  static defaultProps = {
-    username: undefined,
-    onMenuItemClick: () => {},
-  };
-
-  state = {
-    searchBarActive: false,
-  }
-
-  menuForLoggedOut = () => {
-    const next = window.location.pathname.length > 1 ? window.location.pathname : '';
-
-    return (
-      <div className="Topnav__menu-container">
-        <Menu className="Topnav__menu-container__menu" mode="horizontal">
-          <Menu.Item key="signup">
-            <a target="_blank" rel="noopener noreferrer" href="https://steemit.com/pick_account">
-              <FormattedMessage id="signup" defaultMessage="Sign up" />
-            </a>
-          </Menu.Item>
-          <Menu.Item key="divider" disabled>
-          |
-          </Menu.Item>
-          <Menu.Item key="login">
-            <a href="https://v2.steemconnect.com/oauth2/authorize?client_id=smoke-busy&redirect_uri=https%3A%2F%2Fsmk.herokuapp.com%2Fcallback&scope=">
-              <FormattedMessage id="login" defaultMessage="Log in" />
-            </a>
-          </Menu.Item>
-        </Menu>
-      </div>
-    );
-  }
-
-  menuForLoggedIn = () => {
-    const { intl, username, onMenuItemClick } = this.props;
-
-    return (
+  if (username) {
+    content = (
       <div className="Topnav__menu-container">
         <Menu selectedKeys={[]} className="Topnav__menu-container__menu" mode="horizontal">
           <Menu.Item key="write">
@@ -103,68 +65,74 @@ class Topnav extends React.Component {
         </Menu>
       </div>
     );
-  }
-
-  content = () => (this.props.username ? this.menuForLoggedIn() : this.menuForLoggedOut())
-
-  handleMobileSearchButtonClick = () => {
-    const { searchBarActive } = this.state;
-    this.setState({ searchBarActive: !searchBarActive }, () => {
-      this.searchInputRef.refs.input.focus();
-    });
-  }
-
-  render() {
-    const { intl } = this.props;
-    const { searchBarActive } = this.state;
-
-    return (
-      <div className="Topnav">
-        <div className="topnav-layout container">
-          <div className="left">
-            <Link className="Topnav__brand" to="/">
-                <img src={require('./favicon.png')} width={40} height={40}/>
-            </Link>
-            <span className="Topnav__version">beta</span>
-          </div>
-          <div
-            className={classNames('center', { mobileVisible: searchBarActive })}
-          >
-            <div className="Topnav__input-container">
-              <Input
-                ref={(ref) => { this.searchInputRef = ref; }}
-                onPressEnter={event =>
-                  window.open(
-                    `https://www.google.com/search?q=${encodeURIComponent(
-                      `site:steemit.com ${event.target.value}`,
-                    )}`,
-                  )}
-                placeholder={intl.formatMessage({
-                  id: 'search_placeholder',
-                  defaultMessage: 'Search...',
-                })}
-              />
-              <i className="iconfont icon-search" />
-            </div>
-          </div>
-          <div className="right">
-            {this.content()}
-            <button
-              className="Topnav__mobile-search"
-              onClick={this.handleMobileSearchButtonClick}
-            >
-              <i className={
-                classNames('iconfont', {
-                  'icon-close': searchBarActive,
-                  'icon-search': !searchBarActive,
-                })}
-              />
-            </button>
-          </div>
-        </div>
+  } else {
+    content = (
+      <div className="Topnav__menu-container">
+        <Menu className="Topnav__menu-container__menu" mode="horizontal">
+          <Menu.Item key="signup">
+            <a target="_blank" rel="noopener noreferrer" href="https://steemit.com/pick_account">
+              <FormattedMessage id="signup" defaultMessage="Sign up" />
+            </a>
+          </Menu.Item>
+          <Menu.Item key="divider" disabled>
+          |
+          </Menu.Item>
+          <Menu.Item key="login">
+            <a href="https://v2.steemconnect.com/oauth2/authorize?client_id=smoke-busy&redirect_uri=https%3A%2F%2Fsmk.herokuapp.com%2Fcallback&scope=">
+              <FormattedMessage id="login" defaultMessage="Log in" />
+            </a>
+          </Menu.Item>
+        </Menu>
       </div>
     );
   }
+
+  return (
+    <div className="Topnav">
+      <div className="topnav-layout container">
+        <div className="left">
+          <Link className="Topnav__brand" to="/">
+            <img src={require('./favicon.png')} width={40} height={40}/>
+          </Link>
+          <span className="Topnav__version">beta</span>
+        </div>
+        <div className="center">
+          <div className="Topnav__input-container">
+            <Input
+              ref={(ref) => { this.searchInputRef = ref; }}
+              onPressEnter={event =>
+                window.open(
+                  `https://www.google.com/search?q=${encodeURIComponent(
+                    `site:steemit.com ${event.target.value}`,
+                  )}`,
+                )}
+              placeholder={intl.formatMessage({
+                id: 'search_placeholder',
+                defaultMessage: 'Search...',
+              })}
+            />
+            <i className="iconfont icon-search" />
+          </div>
+        </div>
+        <div className="right">
+          {content}
+        </div>
+      </div>
+    </div>
+  );
+
 }
 
-export default injectIntl(Topnav);
+Topnav.propTypes = {
+  intl: PropTypes.shape().isRequired,
+  location: PropTypes.shape().isRequired,
+  username: PropTypes.string,
+  onMenuItemClick: PropTypes.func,
+};
+
+Topnav.defaultProps = {
+  username: undefined,
+  onMenuItemClick: () => {},
+};
+
+export default withRouter(injectIntl(Topnav));
