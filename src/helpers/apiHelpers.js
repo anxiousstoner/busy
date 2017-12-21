@@ -1,7 +1,7 @@
 import Promise from 'bluebird';
 import SteemAPI from '../steemAPI';
 import { jsonParse } from '../helpers/formatter';
-import * as accountHistoryConstants from '../constants/accountHistory';
+import * as accountHistoryConstants from '../common/constants/accountHistory';
 
 /** *
  * Get the path from URL and the API object of steem and return the correct API call based on path

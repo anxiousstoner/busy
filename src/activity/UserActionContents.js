@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
-import * as accountHistory from '../constants/accountHistory';
+import * as accountHistory from '../common/constants/accountHistory';
 
 const UserActionContents = ({ actionType, actionDetails }) => {
   if (_.includes(accountHistory.PARSED_PROPERTIES, actionType)) {

@@ -9,7 +9,9 @@ import { getDraftPosts, getPendingDrafts, getIsReloading } from '../../reducers'
 import Affix from '../../components/Utils/Affix';
 import LeftSidebar from '../../app/Sidebar/LeftSidebar';
 import DraftRow from './DraftRow';
+import requiresLogin from '../../auth/requiresLogin';
 
+@requiresLogin
 @connect(
   state => ({
     reloading: getIsReloading(state),

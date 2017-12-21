@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedNumber } from 'react-intl';
-import * as accountHistoryConstants from '../constants/accountHistory';
+import * as accountHistoryConstants from '../common/constants/accountHistory';
 import ReceiveTransaction from './ReceiveTransaction';
 import TransferTransaction from './TransferTransaction';
 import SavingsTransaction from './SavingsTransaction';

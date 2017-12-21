@@ -44,7 +44,7 @@ export default class Tags extends React.Component {
     tags: {},
   };
 
-  componentWillMount() {
+  componentDidMount() {
     steemAPI.getState('tags', (err, result) => {
       this.setState({ tags: result.tags });
     });

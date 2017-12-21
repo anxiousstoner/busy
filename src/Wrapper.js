@@ -10,7 +10,7 @@ import Cookie from 'js-cookie';
 
 import { getAuthenticatedUser, getLocale } from './reducers';
 
-import { login, logout } from './auth/authActions';
+import { login, logout, getCurrentUserFollowing } from './auth/authActions';
 import { getRate, getRewardFund, getTrendingTopics } from './app/appActions';
 import Topnav from './components/Navigation/Topnav';
 import Transfer from './wallet/Transfer';
@@ -26,6 +26,7 @@ import getTranslations, { getAvailableLocale } from './translations';
   {
     login,
     logout,
+    getCurrentUserFollowing,
     getRate,
     getRewardFund,
     getTrendingTopics,
@@ -37,10 +38,10 @@ export default class Wrapper extends React.PureComponent {
     route: PropTypes.shape().isRequired,
     user: PropTypes.shape().isRequired,
     locale: PropTypes.string.isRequired,
-    children: PropTypes.element,
     history: PropTypes.shape().isRequired,
     login: PropTypes.func,
     logout: PropTypes.func,
+    getCurrentUserFollowing: PropTypes.func,
     getRewardFund: PropTypes.func,
     getRebloggedList: PropTypes.func,
     getRate: PropTypes.func,
@@ -50,16 +51,19 @@ export default class Wrapper extends React.PureComponent {
   static defaultProps = {
     login: () => {},
     logout: () => {},
+    getCurrentUserFollowing: () => {},
     getRewardFund: () => {},
     getRebloggedList: () => {},
     getRate: () => {},
     getTrendingTopics: () => {},
   };
 
-  componentWillMount() {
-    if (Cookie.get('access_token')) {
-      this.props.login();
-    }
+  static fetchData(store) {
+    return store.dispatch(login());
+  }
+
+  componentDidMount() {
+    this.props.login().then(() => this.props.getCurrentUserFollowing());
     this.props.getRewardFund();
     this.props.getRebloggedList();
     this.props.getRate();

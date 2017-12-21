@@ -1,8 +1,5 @@
-import Promise from 'bluebird';
-import SteemConnect from 'sc2-sdk';
 import omit from 'lodash/omit';
-
-Promise.promisifyAll(SteemConnect, { context: SteemConnect });
+import SteemConnect from '../steemConnectAPI';
 
 const getMetadata = () => SteemConnect.me().then(resp => resp.user_metadata);
 

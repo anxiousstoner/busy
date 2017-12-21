@@ -1,12 +1,8 @@
-import Promise from 'bluebird';
-import steemConnect from 'sc2-sdk';
 import Cookie from 'js-cookie';
 import { getAccountWithFollowingCount } from '../helpers/apiHelpers';
 import { getFollowing } from '../user/userActions';
 import { initPushpad } from '../helpers/pushpadHelper';
 import { createAsyncActionType } from '../helpers/stateHelpers';
-
-Promise.promisifyAll(steemConnect);
 
 export const LOGIN = '@auth/LOGIN';
 export const LOGIN_START = '@auth/LOGIN_START';
@@ -25,41 +21,42 @@ export const LOGOUT_SUCCESS = '@auth/LOGOUT_SUCCESS';
 
 export const UPDATE_AUTH_USER = createAsyncActionType('@auth/UPDATE_AUTH_USER');
 
-export const login = () => (dispatch) => {
-  dispatch({
+export const login = () => (dispatch, getState, { steemConnectAPI }) => {
+  if (!steemConnectAPI.options.accessToken) return Promise.resolve(null);
+  if (getIsAuthenticated(getState())) return Promise.resolve(null);
+  return dispatch({
     type: LOGIN,
     payload: {
-      promise: steemConnect.me()
-        .then((resp) => {
-          dispatch(getFollowing(resp.user));
-          initPushpad(resp.user, Cookie.get('access_token'));
-          return resp;
-        }),
+      promise: steemConnectAPI.me().then((resp) => {
+        initPushpad(resp.user, Cookie.get('access_token'));
+        return resp;
+      }),
     },
   });
 };
 
-export const reload = () => dispatch =>
+export const getCurrentUserFollowing = () => dispatch => dispatch(getFollowing());
+
+export const reload = () => (dispatch, getState, { steemConnectAPI }) =>
   dispatch({
     type: RELOAD,
     payload: {
-      promise: steemConnect.me(),
+      promise: steemConnectAPI.me(),
     },
   });
 
-export const logout = () => (dispatch) => {
+export const logout = () => (dispatch, getState, { steemConnectAPI }) =>
   dispatch({
     type: LOGOUT,
     payload: {
-      promise: steemConnect.revokeToken()
-        .then(() => Cookie.remove('access_token')),
+      promise: steemConnectAPI.revokeToken().then(() => Cookie.remove('access_token')),
     },
   });
-};
 
-export const updateAuthUser = username => dispatch => dispatch({
-  type: UPDATE_AUTH_USER.ACTION,
-  payload: {
-    promise: getAccountWithFollowingCount(username),
-  },
-});
+export const updateAuthUser = username => dispatch =>
+  dispatch({
+    type: UPDATE_AUTH_USER.ACTION,
+    payload: {
+      promise: getAccountWithFollowingCount(username),
+    },
+  });

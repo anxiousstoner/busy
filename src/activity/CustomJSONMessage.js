@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import _ from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
-import * as accountHistoryConstants from '../constants/accountHistory';
+import * as accountHistoryConstants from '../common/constants/accountHistory';
 
 const CustomJSONMessage = ({ actionDetails, currentUsername }) => {
   const actionJSON = JSON.parse(actionDetails.json);

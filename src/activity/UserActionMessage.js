@@ -4,7 +4,7 @@ import steem from 'steem';
 import _ from 'lodash';
 import { FormattedMessage, FormattedNumber } from 'react-intl';
 import { Link } from 'react-router-dom';
-import * as accountHistoryConstants from '../constants/accountHistory';
+import * as accountHistoryConstants from '../common/constants/accountHistory';
 import VoteActionMessage from './VoteActionMessage';
 import CustomJSONMessage from './CustomJSONMessage';
 import AuthorRewardMessage from './AuthorRewardMessage';

@@ -44,11 +44,7 @@ export default class UserProfile extends React.Component {
     getMoreFeedContent: () => {},
   };
 
-  static needs = [
-    ({ name }) => getFeedContent({ sortBy: 'blog', category: name, limit: 10 }),
-  ]
-
-  componentWillMount() {
+  componentDidMount() {
     this.props.getFeedContent({
       sortBy: 'blog',
       category: this.props.match.params.name,

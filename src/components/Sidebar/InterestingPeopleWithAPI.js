@@ -31,7 +31,7 @@ class InterestingPeopleWithAPI extends Component {
     noUsers: false,
   };
 
-  componentWillMount() {
+  componentDidMount() {
     const authenticatedUsername = this.props.authenticatedUser.name;
     const username = _.has(this.props, 'match.params.name')
       ? this.props.match.params.name

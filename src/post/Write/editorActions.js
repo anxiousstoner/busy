@@ -1,6 +1,5 @@
 import Promise from 'bluebird';
 import assert from 'assert';
-import SteemConnect from 'sc2-sdk';
 import { push } from 'react-router-redux';
 import { createAction } from 'redux-actions';
 import { addDraftMetadata, deleteDraftMetadata } from '../../helpers/metadata';
@@ -68,7 +67,8 @@ const requiredFields = 'parentAuthor,parentPermlink,author,permlink,title,body,j
   ',',
 );
 
-export const broadcastComment = (
+const broadcastComment = (
+  steemConnectAPI,
   parentAuthor,
   parentPermlink,
   author,
@@ -126,7 +126,7 @@ export const broadcastComment = (
     ]);
   }
 
-  return SteemConnect.broadcast(operations);
+  return steemConnectAPI.broadcast(operations);
 };
 
 export function createPost(postData) {
@@ -134,7 +134,7 @@ export function createPost(postData) {
     assert(postData[field] != null, `Developer Error: Missing required field ${field}`);
   });
 
-  return (dispatch) => {
+  return (dispatch, getState, { steemConnectAPI }) => {
     const {
       parentAuthor,
       parentPermlink,
@@ -161,6 +161,7 @@ export function createPost(postData) {
           const newBody = isUpdating ? getBodyPatchIfSmaller(postData.originalBody, body) : body + `\n\n<hr/><p>This was posted from <a href="https://smoke.network">Smoke.Network</a></p>`;
 
           broadcastComment(
+            steemConnectAPI,
             parentAuthor,
             parentPermlink,
             author,

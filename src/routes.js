@@ -7,7 +7,13 @@ import { renderRoutes } from 'react-router-config';
 
 import routes from './common/routes';
 
-export default <Switch>{renderRoutes(routes)}</Switch>;
+const history = typeof window === 'undefined' ? createMemoryHistory() : createBrowserHistory();
 
-export const history =
-  typeof window === 'undefined' ? createMemoryHistory() : createBrowserHistory();
+if (typeof window !== 'undefined' && window.analytics) {
+  history.listen((location) => {
+    window.analytics.page({ url: location.pathname });
+  });
+}
+
+export { history };
+export default <Switch>{renderRoutes(routes)}</Switch>;

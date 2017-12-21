@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
-import * as accountHistoryConstants from '../constants/accountHistory';
+import * as accountHistoryConstants from '../common/constants/accountHistory';
 import Avatar from '../components/Avatar';
 
 class UserActionIcon extends React.Component {

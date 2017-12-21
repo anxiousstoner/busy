@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import steemConnect from 'sc2-sdk';
 import _ from 'lodash';
 import { injectIntl, FormattedMessage, FormattedNumber } from 'react-intl';
+import SteemConnect from '../steemConnectAPI';
 import { getAuthenticatedUser } from '../reducers';
 import { getUserAccountHistory } from './walletActions';
 import { updateAuthUser } from '../auth/authActions';
@@ -43,7 +43,7 @@ class ClaimRewardsBlock extends Component {
     this.setState({
       loading: true,
     });
-    steemConnect.claimRewardBalance(
+    SteemConnect.claimRewardBalance(
       name,
       reward_steem_balance,
       reward_sbd_balance,

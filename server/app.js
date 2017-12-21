@@ -6,6 +6,7 @@ import { renderToString } from 'react-dom/server';
 import { StaticRouter } from 'react-router';
 import { matchRoutes, renderRoutes } from 'react-router-config';
 
+import sc2 from 'sc2-sdk';
 import getStore from '../src/store';
 import routes from '../src/common/routes';
 
@@ -13,6 +14,7 @@ const fs = require('fs');
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const http = require('http');
 const https = require('https');
 const steem = require('steem');
@@ -27,10 +29,6 @@ const server = http.Server(app);
 
 const rootDir = path.join(__dirname, '..');
 
-if (process.env.NODE_ENV !== 'production') {
-  require('../webpack')(app);
-}
-
 if (process.env.STEEMJS_URL) {
   steem.api.setOptions({ url: process.env.STEEMJS_URL });
 }
@@ -38,13 +36,14 @@ if (process.env.STEEMJS_URL) {
 app.locals.env = process.env;
 app.enable('trust proxy');
 
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(rootDir, 'public'), { maxAge: OneWeek }));
+  app.use(express.static(path.join(rootDir, 'public'), { maxAge: OneWeek, index: false }));
 } else {
-  app.use(express.static(path.join(rootDir, 'public')));
+  app.use(express.static(path.join(rootDir, 'public'), { index: false }));
 }
 
 const indexPath = `${rootDir}/public/index.html`;
@@ -52,7 +51,6 @@ const indexPath = `${rootDir}/public/index.html`;
 const indexHtml = fs.readFileSync(indexPath, 'utf-8');
 
 function renderPage(store, html) {
-
   const preloadedState = store.getState();
   const helmet = Helmet.renderStatic();
   const header = helmet.meta.toString() + helmet.title.toString() + helmet.link.toString();
@@ -65,12 +63,22 @@ function renderPage(store, html) {
         // WARNING: See the following for security issues around embedding JSON in HTML:
         // http://redux.js.org/docs/recipes/ServerRendering.html#security-considerations
         window.__PRELOADED_STATE__ = ${JSON.stringify(preloadedState).replace(/</g, '\\u003c')}
-    </script>`
+    </script>`,
     );
 }
 
 function serverSideResponse(req, res) {
-  const store = getStore();
+  const api = sc2.Initialize({
+    app: process.env.STEEMCONNECT_CLIENT_ID,
+    baseURL: process.env.STEEMCONNECT_HOST,
+    callbackURL: process.env.STEEMCONNECT_REDIRECT_URL,
+  });
+
+  if (req.cookies.access_token) {
+    api.setAccessToken(req.cookies.access_token);
+  }
+
+  const store = getStore(api);
 
   const branch = matchRoutes(routes, req.url);
   const promises = branch.map(({ route, match }) => {
@@ -81,28 +89,24 @@ function serverSideResponse(req, res) {
     return Promise.resolve(null);
   });
 
-  return Promise.all(promises).then(() => {
-    const context = {};
-    const content = renderToString(
-      <Provider store={store}>
-        <StaticRouter location={req.url} context={context}>
-          {renderRoutes(routes)}
-        </StaticRouter>
-      </Provider>,
-    );
+  return Promise.all(promises)
+    .then(() => {
+      const context = {};
+      const content = renderToString(
+        <Provider store={store}>
+          <StaticRouter location={req.url} context={context}>
+            {renderRoutes(routes)}
+          </StaticRouter>
+        </Provider>,
+      );
 
-    res.send(renderPage(store, content));
-  });
+      res.send(renderPage(store, content));
+    })
+    .catch((err) => {
+      console.error('SSR error occured, falling back to bundled application instead', err);
+      res.send(indexHtml);
+    });
 }
-
-
-// List of routes to use SSR for
-  app.get('/:category/@:author/:permlink', serverSideResponse);
-
-  app.get('/*', (req, res) => {
-    res.send(indexHtml);
-  });
-
 
 app.get('/callback', (req, res) => {
   const accessToken = req.query.access_token;
@@ -116,5 +120,7 @@ app.get('/callback', (req, res) => {
     res.status(401).send({ error: 'access_token or expires_in Missing' });
   }
 });
+
+app.get('/*', serverSideResponse);
 
 module.exports = { app, server };

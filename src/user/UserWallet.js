@@ -88,7 +88,7 @@ class Wallet extends Component {
     authenticatedUserName: '',
   };
 
-  componentWillMount() {
+  componentDidMount() {
     const {
       totalVestingShares,
       totalVestingFundSteem,

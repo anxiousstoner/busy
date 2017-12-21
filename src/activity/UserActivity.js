@@ -91,7 +91,7 @@ class UserActivity extends React.Component {
     authenticatedUserName: '',
   };
 
-  componentWillMount() {
+  componentDidMount() {
     const {
       totalVestingShares,
       totalVestingFundSteem,

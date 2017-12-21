@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { injectIntl, FormattedMessage } from 'react-intl';
 import { withRouter, Link } from 'react-router-dom';
 import { Menu, Popover, Tooltip, Input } from 'antd';
-import steemconnect from 'sc2-sdk';
 import classNames from 'classnames';
 import Avatar from '../Avatar';
 import PopoverMenu, { PopoverMenuItem } from '../PopoverMenu/PopoverMenu';
@@ -92,7 +91,7 @@ const Topnav = ({ intl, location, username, onMenuItemClick }) => {
       <div className="topnav-layout container">
         <div className="left">
           <Link className="Topnav__brand" to="/">
-            <img src={require('./favicon.png')} width={40} height={40}/>
+            Smoke
           </Link>
           <span className="Topnav__version">beta</span>
         </div>

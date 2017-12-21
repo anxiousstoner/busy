@@ -4,7 +4,7 @@ import { FormattedMessage } from 'react-intl';
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import { Checkbox } from 'antd';
-import * as accountHistoryConstants from '../constants/accountHistory';
+import * as accountHistoryConstants from '../common/constants/accountHistory';
 import { updateAccountHistoryFilter } from '../wallet/walletActions';
 import './UserActivitySearch.less';
 

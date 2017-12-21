@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { Route } from 'react-router-dom';
+import { renderRoutes } from 'react-router-config';
 import { Helmet } from 'react-helmet';
 import getImage from '../helpers/getImage';
 
@@ -14,17 +14,6 @@ import LeftSidebar from '../app/Sidebar/LeftSidebar';
 import RightSidebar from '../app/Sidebar/RightSidebar';
 import Affix from '../components/Utils/Affix';
 import ScrollToTopOnMount from '../components/Utils/ScrollToTopOnMount';
-
-import UserProfile from './UserProfile';
-import UserComments from './UserComments';
-import UserFollowers from './UserFollowers';
-import UserFollowing from './UserFollowing';
-import UserReblogs from './UserReblogs';
-import UserFeed from './UserFeed';
-import UserWallet from './UserWallet';
-import UserActivity from '../activity/UserActivity';
-
-export const needs = [getAccountWithFollowingCount];
 
 @connect(
   (state, ownProps) => ({
@@ -39,6 +28,7 @@ export const needs = [getAccountWithFollowingCount];
 )
 export default class User extends React.Component {
   static propTypes = {
+    route: PropTypes.shape().isRequired,
     authenticated: PropTypes.bool.isRequired,
     authenticatedUser: PropTypes.shape().isRequired,
     match: PropTypes.shape().isRequired,
@@ -52,13 +42,15 @@ export default class User extends React.Component {
     openTransfer: () => {},
   };
 
-  static needs = needs;
+  static fetchData(store, match) {
+    return store.dispatch(getAccountWithFollowingCount({ name: match.params.name }));
+  }
 
   state = {
     popoverVisible: false,
   };
 
-  componentWillMount() {
+  componentDidMount() {
     if (!this.props.user.name) {
       this.props.getAccountWithFollowingCount({ name: this.props.match.params.name });
     }
@@ -84,13 +76,13 @@ export default class User extends React.Component {
   }
 
   render() {
-    const { authenticated, authenticatedUser, match } = this.props;
+    const { authenticated, authenticatedUser } = this.props;
     const username = this.props.match.params.name;
     const { user } = this.props;
     const { profile = {} } = user.json_metadata || {};
     const busyHost = global.postOrigin || 'https://smoke.network';
-    const desc = profile.about || `Post by ${username}`;
-    const image = getImage(`@${username}`);
+    const desc = profile.about || `Posts by ${username}`;
+    const image = getImage(`@${username}`) || '/images/logo.png';
     const canonicalUrl = `${busyHost}/@${username}`;
     const url = `${busyHost}/@${username}`;
     const displayedUsername = profile.name || username || '';
@@ -146,16 +138,7 @@ export default class User extends React.Component {
             <Affix className="rightContainer" stickPosition={72}>
               <div className="right">{user && user.name && <RightSidebar key={user.name} />}</div>
             </Affix>
-            <div className="center">
-              <Route exact path={match.path} component={UserProfile} />
-              <Route path={`${match.path}/comments`} component={UserComments} />
-              <Route path={`${match.path}/followers`} component={UserFollowers} />
-              <Route path={`${match.path}/followed`} component={UserFollowing} />
-              <Route path={`${match.path}/reblogs`} component={UserReblogs} />
-              <Route path={`${match.path}/feed`} component={UserFeed} />
-              <Route path={`${match.path}/transfers`} component={UserWallet} />
-              <Route path={`${match.path}/activity`} component={UserActivity} />
-            </div>
+            <div className="center">{renderRoutes(this.props.route.routes)}</div>
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import * as accountHistoryConstants from '../constants/accountHistory';
+import * as accountHistoryConstants from '../common/constants/accountHistory';
 
 export const getVoteMessage = (intl, actionDetails) => {
   let voteType = 'unvoted';
